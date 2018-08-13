@@ -8,11 +8,10 @@
 #'
 #' @docType package
 #' @name nof1-package
-#'
+NULL
+
 #' @import coda
 #' @import MASS
-#' @import ggplot2
-#' @import scales
 #' @import ggplot2
 #' @import scales
 NULL
