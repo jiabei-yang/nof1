@@ -4,8 +4,8 @@
 \alias{nof1.ordinal.simulation2}
 \title{Ordinal simulation for WNYC}
 \usage{
-nof1.ordinal.simulation2(alpha = 0, beta_A = -0.1, cut = c(0, 0.5, 1.5,
-  2), ncat = 5)
+nof1.ordinal.simulation2(alpha = 0, beta_B = 1, cut = c(-2, -1.5, -1,
+  -0.5, 0, 0.5, 1, 1.5, 2, 2.1, 2.3), ncat = 11)
 }
 \description{
 Ordinal simulation for WNYC
