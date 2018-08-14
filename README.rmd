@@ -1,6 +1,6 @@
 # N-Of-1 (Single Subject Design)
 
-This is a N-Of-1 R package under development. Please see the nof1.pdf document for more details.
+This repo was primarily created to serve as an analysis tool for the PCORI project. For public use, please see nof1.pdf for more details. You can run Bayesian linear regression, ordinal/logistic regression, and poisson regression using this package.
 
 # To Install and Load the package
 
