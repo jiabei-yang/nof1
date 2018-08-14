@@ -9,7 +9,7 @@ nof1.run(nof1, inits = NULL, n.chains = 3, max.run = 1e+05,
   extra.pars.save = NULL)
 }
 \arguments{
-\item{nof1}{nof1 object created from \code{\link{network.data}} function}
+\item{nof1}{nof1 object created from \code{\link{nof1.data}} function}
 
 \item{inits}{Initial values for the parameters being sampled. If left unspecified, program will generate reasonable initial values.}
 
@@ -44,6 +44,6 @@ laughter
 Y <- laughter$Y
 Treat <- laughter$Treat
 nof1 <- nof1.data(Y, Treat, ncat = 11, baseline = "Usual Routine", response = "ordinal")
-result <- network.run(nof1)
+result <- nof1.run(nof1)
 summary(result$samples)
 }

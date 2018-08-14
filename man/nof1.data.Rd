@@ -47,7 +47,7 @@ Creates list of variables that are used to run the model using \code{\link{nof1.
 \item{nobs}{Total number of observations in a study}
 \item{Treat.name}{Treatment name besides baseline treatment}
 \item{response}{The type of response variable}
-\item{priors}{Priors that the code will be using}
+\item{priors}{Priors that the code will be using. Default priors are used if prior was not specified}
 \item{code}{Rjags model file code that is generated using information provided by the user. To view model file inside R, use \code{cat(nof1$code).}}
 }
 \description{
