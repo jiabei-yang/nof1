@@ -1,19 +1,19 @@
 # N-Of-1 (Single Subject Design)
 
-This is a N-Of-1 R package under development. Can use devtools to install the package.
+This is a N-Of-1 R package under development. Please see the nof1.pdf document for more details.
 
-# To Install
+# To Install and Load the package
 
 ```{r}
 library(devtools)
-install_github("MikeJSeo/nof1")
+install_github("MikeJSeo/nof1", force = TRUE)
+library(nof1)
 ```
 
 # To Run
 
 ```{r}
 library(jsonlite)
-library(nof1)
 
 ##### PRODUCE
 json.file <- fromJSON("sample input.json")
