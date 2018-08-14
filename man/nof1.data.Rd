@@ -6,7 +6,8 @@
 \usage{
 nof1.data(Y, Treat, baseline = "baseline", ncat = NULL, response = NULL,
   Time = NULL, knots = NULL, alpha.prior = NULL, beta.prior = NULL,
-  dc.prior = NULL, c1.prior = NULL, rho.prior = NULL, hy.prior = NULL)
+  gamma.prior = NULL, dc.prior = NULL, c1.prior = NULL,
+  rho.prior = NULL, hy.prior = NULL)
 }
 \arguments{
 \item{Y}{Outcome of the study. This should be a vector with length of total number of observations.}
@@ -27,6 +28,8 @@ nof1.data(Y, Treat, baseline = "baseline", ncat = NULL, response = NULL,
 
 \item{beta.prior}{Prior for the treatment coefficient.}
 
+\item{gamma.prior}{Prior for modelling splines. Still under development.}
+
 \item{dc.prior}{Prior for the length between cutpoints. Used only for ordinal logistic models.}
 
 \item{c1.prior}{Prior for the first cutpoint. Used only for ordinal logistic models.}
@@ -34,8 +37,6 @@ nof1.data(Y, Treat, baseline = "baseline", ncat = NULL, response = NULL,
 \item{rho.prior}{Prior for the correlated error model. Still under development.}
 
 \item{hy.prior}{Prior for the heterogeneity parameter. Supports uniform, gamma, and half normal for normal and binomial response and wishart for multinomial response. It should be a list of length 3, where first element should be the distribution (one of dunif, dgamma, dhnorm, dwish) and the next two are the parameters associated with the distribution. For example, list("dunif", 0, 5) give uniform prior with lower bound 0 and upper bound 5 for the heterogeneity parameter. For wishart distribution, the last two parameter would be the scale matrix and the degrees of freedom.}
-
-\item{gamma.prior}{Prior for modelling splines. Still under development.}
 }
 \value{
 Creates list of variables that are used to run the model using \code{\link{nof1.run}}
