@@ -217,10 +217,6 @@ calculate_p_threshold <- function(coef, response){
   })
 }
 
-#' Summarizes the result from the model into json format
-#'
-#' @export
-
 summarize_nof1 <- function(nof1, result){
 
   with(c(nof1, result),{

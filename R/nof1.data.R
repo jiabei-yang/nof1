@@ -1,4 +1,4 @@
-#' Make a N of 1 object containing data, priors, and a jags model file
+#' Make an N of 1 object containing data, priors, and a jags model file
 #'
 #' @param Y Outcome of the study. This should be a vector with length of total number of observations.
 #' @param Treat Treatment indicator vector with same length as the outcome.
