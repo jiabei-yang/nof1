@@ -80,6 +80,7 @@ stacked_percent_barplot <- function(nof1, title = NULL){
 #' Summary data table for nof1
 #'
 #' @param nof1 nof1 object created using nof1.data
+#' @examples
 #' Y <- laughter$Y
 #' Treat <- laughter$Treat
 #' nof1 <- nof1.data(Y, Treat, ncat = 11, baseline = "Usual Routine", response = "ordinal")
