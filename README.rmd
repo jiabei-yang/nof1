@@ -10,7 +10,7 @@ install_github("MikeJSeo/nof1", force = TRUE)
 library(nof1)
 ```
 
-# To Run
+# PCORI Codes 
 
 ```{r}
 library(jsonlite)
