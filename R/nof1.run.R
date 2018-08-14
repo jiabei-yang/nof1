@@ -3,7 +3,7 @@
 #' This is the core function that runs the model in our program. Before running this function, we need to specify data, prior, 
 #' JAGS code, etc. using \code{\link{nof1.data}}.
 #'
-#' @param nof1 nof1 object created from \code{\link{network.data}} function
+#' @param nof1 nof1 object created from \code{\link{nof1.data}} function
 #' @param inits Initial values for the parameters being sampled. If left unspecified, program will generate reasonable initial values.
 #' @param n.chains Number of chains to run
 #' @param max.run Maximum number of iterations that user is willing to run. If the algorithm is not converging, it will run up to \code{max.run} iterations before printing a message that it did not converge
@@ -25,7 +25,7 @@
 #' Y <- laughter$Y
 #' Treat <- laughter$Treat
 #' nof1 <- nof1.data(Y, Treat, ncat = 11, baseline = "Usual Routine", response = "ordinal")
-#' result <- network.run(nof1)
+#' result <- nof1.run(nof1)
 #' summary(result$samples)
 #' @export
 
@@ -34,7 +34,7 @@ nof1.run <- function(nof1, inits = NULL, n.chains = 3, max.run = 100000, setsize
                      conv.limit = 1.05, extra.pars.save = NULL){
 
   if (!inherits(nof1, "nof1.data")) {
-    stop('Given network is not nof1.data. Run nof1.data function first')
+    stop('Given object is not nof1.data. Run nof1.data function first')
   }
 
   if(max.run < setsize){
