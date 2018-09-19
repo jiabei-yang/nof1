@@ -4,10 +4,10 @@
 \alias{nof1.data}
 \title{Make an N of 1 object containing data, priors, and a jags model file}
 \usage{
-nof1.data(Y, Treat, baseline = "baseline", ncat = NULL, response = NULL,
-  Time = NULL, knots = NULL, alpha.prior = NULL, beta.prior = NULL,
-  gamma.prior = NULL, dc.prior = NULL, c1.prior = NULL,
-  rho.prior = NULL, hy.prior = NULL)
+nof1.data(Y, Treat, baseline = "baseline", ncat = NULL,
+  response = NULL, Time = NULL, knots = NULL, alpha.prior = NULL,
+  beta.prior = NULL, gamma.prior = NULL, dc.prior = NULL,
+  c1.prior = NULL, rho.prior = NULL, hy.prior = NULL)
 }
 \arguments{
 \item{Y}{Outcome of the study. This should be a vector with length of total number of observations.}
