@@ -237,6 +237,9 @@ summarize_nof1 <- function(nof1, result){
   })
 }
 
+#' For PCORI purposes
+#'
+#' @export
 
 
 wrap <- function(data, metadata){

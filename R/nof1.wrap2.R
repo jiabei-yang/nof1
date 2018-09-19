@@ -49,6 +49,10 @@ summarize_nof1_afib <- function(nof1, result){
   })
 }
 
+#' For PCORI purposes
+#'
+#' @export
+
 wrap2 <- function(data, metadata){
 
   read_data <- tryCatch({
