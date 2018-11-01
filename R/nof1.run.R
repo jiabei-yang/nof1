@@ -46,7 +46,7 @@ nof1.run <- function(nof1, inits = NULL, n.chains = 3, max.run = 100000, setsize
   pars.save <- ifelse(response == "ordinal", "c", "alpha")
 
   if(response == "normal"){
-    pars.save <- c(pars.save, "logprec")
+    pars.save <- c(pars.save, "sd")
   }
 
   # if(!is.null(knots)){
