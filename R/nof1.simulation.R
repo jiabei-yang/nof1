@@ -80,6 +80,11 @@ nof1.poisson.simulation <- function(Base.size = 14, Treat.size = 56, alpha = 1, 
   list(Y = Y, Treat = Treat)
 }
 
+#' Normal data simulation
+#' 
+#' Simulating sample normal data
+#'
+#' @export
 
 nof1.normal.simulation <- function(Base.size = 2, Treat.size = 8, prec = 0.5, alpha = 50, beta_A = -3, beta_B = -1){
   
