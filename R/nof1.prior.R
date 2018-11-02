@@ -27,7 +27,7 @@ nof1.prior.default <- function(prior.param){
     if(response == "binomial"){
       hy.prior <- list("dunif", 0, 5)
     } else if (response == "normal"){
-      hy.prior <- list("dgamma", 1, 0.001)
+      hy.prior <- list("dgamma", 0.001, 0.001)
     #  hy.prior <- list("dunif", 0, 20)
     } else{
       hy.prior <- list("dgamma", 1, 0.001)
