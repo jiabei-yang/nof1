@@ -1,10 +1,10 @@
-
 read_input_data <- function(data, metadata){
 
   if(metadata$user_age < 14){
     Outcome <- data$parent_response
   } else{
-    if(sum(is.na(data$parent_response)) < sum(is.na(data$child_response))){
+    if(length(unlist(data$parent_response)[!is.na(unlist(data$parent_response))]) >= 
+       length(unlist(data$child_response)[!is.na(unlist(data$child_response))])){
       Outcome <- data$parent_response
     }else{
       Outcome <- data$child_response
@@ -16,10 +16,20 @@ read_input_data <- function(data, metadata){
   Treatment[Treatment == "liberalized"] = "B"
 
   length_each <- sapply(Outcome[,"daily_stool_consistency"], length)
-  Treat <- rep(Treatment, times = length_each)
+  Treat_stool_consistency <- rep(Treatment, times = length_each)
+  change_point_stool_consistency <- cumsum(length_each)
   
-  length_each2 <- sapply(Outcome[,"promis_gi_symptoms"]$`t-score`, length)
-  Treatment_weekly <- rep(Treatment, time = length_each2)
+  length_each <- sapply(Outcome[,"daily_stool_frequency"], length)
+  Treat_stool_frequency <- rep(Treatment, times = length_each)
+  change_point_stool_frequency <- cumsum(length_each)
+  
+  length_each <- sapply(Outcome[,"promis_pain_interference"]$`t-score`, length)
+  Treat_pain_interference <- rep(Treatment, time = length_each)
+  change_point_pain_interference <- cumsum(length_each)
+  
+  length_each <- sapply(Outcome[,"promis_gi_symptoms"]$`t-score`, length)
+  Treat_gi_symptoms <- rep(Treatment, time = length_each)
+  change_point_gi_symptoms <- cumsum(length_each)
 
   stool_consistency <- unlist(Outcome$daily_stool_consistency)
   stool_consistency <- ifelse(1 < stool_consistency & stool_consistency < 7, 0, 1)
@@ -28,37 +38,97 @@ read_input_data <- function(data, metadata){
   pain_interference <- as.vector(unlist(Outcome$promis_pain_interference))
   gi_symptoms <- as.vector(unlist(Outcome$promis_gi_symptoms))
 
-  list(Treatment = Treat, Treatment_weekly = Treatment_weekly, stool_consistency = stool_consistency, stool_frequency = stool_frequency, pain_interference = pain_interference,  gi_symptoms = gi_symptoms)
+  list(stool_consistency              = stool_consistency, 
+       Treat_stool_consistency        = Treat_stool_consistency,
+       change_point_stool_consistency = change_point_stool_consistency,
+       stool_frequency                = stool_frequency, 
+       Treat_stool_frequency          = Treat_stool_frequency,
+       change_point_stool_frequency   = change_point_stool_frequency,
+       pain_interference              = pain_interference,  
+       Treat_pain_interference        = Treat_pain_interference,
+       change_point_pain_interference = change_point_pain_interference,
+       gi_symptoms                    = gi_symptoms,
+       Treat_gi_symptoms              = Treat_gi_symptoms,
+       change_point_gi_symptoms       = change_point_gi_symptoms)
 }
 
 washout <- function(read_data){
   
+  # read_data <- read_dummy
   with(read_data,{
     
-    change_point <- cumsum(rle(Treatment)$lengths)
-    change_point <- change_point[-length(change_point)]
+    # change_point <- cumsum(rle(Treatment)$lengths)
+    # change_point <- cumsum(rle(read_data$Treatment)$lengths)
+    # change_point <- change_point[-length(change_point)] # commented since we need the length of the whole study
     
+    # Stool consistency
     delete_obs_daily <- NULL
-    for(i in 1:length(change_point)){
-      delete_obs_daily <- c(delete_obs_daily, (change_point[i]+1):(change_point[i]+7))
+    for(i in 1:(length(change_point_stool_consistency) - 1)){
+      
+      # delete observations if not enough measurements for washout
+      if ((change_point_stool_consistency[i+1] - change_point_stool_consistency[i]) < 7) {
+        delete_obs_daily <- c(delete_obs_daily, (change_point_stool_consistency[i]+1):(change_point_stool_consistency[i+1]))
+      } else {
+        delete_obs_daily <- c(delete_obs_daily, (change_point_stool_consistency[i]+1):(change_point_stool_consistency[i]+7))
+      }
+      
     }
+    
     delete_obs_daily
+    stool_consistency[delete_obs_daily] <- NA
     
+    # Stool frequency
+    delete_obs_daily <- NULL
+    for(i in 1:(length(change_point_stool_frequency) - 1)){
+      
+      # delete observations if not enough measurements for washout
+      if ((change_point_stool_frequency[i+1] - change_point_stool_frequency[i]) < 7) {
+        delete_obs_daily <- c(delete_obs_daily, (change_point_stool_frequency[i]+1):(change_point_stool_frequency[i+1]))
+      } else {
+        delete_obs_daily <- c(delete_obs_daily, (change_point_stool_frequency[i]+1):(change_point_stool_frequency[i]+7))
+      }
+      
+    }
     
-    change_point2 <- cumsum(rle(Treatment_weekly)$lengths)
-    change_point2 <- change_point2[-length(change_point2)]
+    delete_obs_daily
+    stool_frequency[delete_obs_daily] <- NA
+    
+    # change_point2 <- cumsum(rle(Treatment_weekly)$lengths)
+    # change_point2 <- cumsum(rle(read_data$Treatment_weekly)$lengths)
+    # change_point2 <- change_point2[-length(change_point2)]
+    
+    # Pain interference
     delete_obs_weekly <- NULL
-    for(i in 1:length(change_point2)){
-      delete_obs_weekly <- c(delete_obs_weekly, (change_point2[i]+1))
+    for(i in 1:(length(change_point_pain_interference) - 1)){
+      
+      if ((change_point_pain_interference[i+1] - change_point_pain_interference[i]) >= 1) {
+        delete_obs_weekly <- c(delete_obs_weekly, change_point_pain_interference[i]+1)
+      }
+
     }
     delete_obs_weekly
-    
-    stool_consistency[delete_obs_daily] <- NA
-    stool_frequency[delete_obs_daily] <- NA
     pain_interference[delete_obs_weekly] <- NA
+    
+    # gi symptoms
+    delete_obs_weekly <- NULL
+    for(i in 1:(length(change_point_gi_symptoms) - 1)){
+      
+      if ((change_point_gi_symptoms[i+1] - change_point_gi_symptoms[i]) >= 1) {
+        delete_obs_weekly <- c(delete_obs_weekly, change_point_gi_symptoms[i]+1)
+      }
+      
+    }
+    delete_obs_weekly
     gi_symptoms[delete_obs_weekly] <- NA
     
-    list(Treatment = Treatment, Treatment_weekly = Treatment_weekly, stool_consistency = stool_consistency, stool_frequency = stool_frequency, pain_interference = pain_interference, gi_symptoms = gi_symptoms)
+    list(stool_consistency       = stool_consistency, 
+         Treat_stool_consistency = Treat_stool_consistency,
+         stool_frequency         = stool_frequency, 
+         Treat_stool_frequency   = Treat_stool_frequency,
+         pain_interference       = pain_interference,  
+         Treat_pain_interference = Treat_pain_interference,
+         gi_symptoms             = gi_symptoms,
+         Treat_gi_symptoms       = Treat_gi_symptoms)
   })
 }
 
@@ -246,7 +316,7 @@ wrap <- function(data, metadata){
 
   read_data <- tryCatch({
     read_dummy <- read_input_data(data, metadata)
-    if(length(rle(read_dummy$Treatment)$lengths) > 1) read_dummy <- washout(read_dummy)
+    if(length(rle(read_dummy$Treat_pain_interference)$lengths) > 1) read_dummy <- washout(read_dummy)
     read_dummy
   }, error = function(error){
     return(paste("input read error: ", error))
@@ -255,7 +325,7 @@ wrap <- function(data, metadata){
   print(read_data)
 
   stool_frequency <- tryCatch({
-    data_freq <- list(Treat = read_data$Treatment, Y = read_data$stool_frequency)
+    data_freq <- list(Treat = read_data$Treat_stool_frequency, Y = read_data$stool_frequency)
     nof1_freq <- with(data_freq, {
       nof1.data(Y, Treat, response = "poisson")
     })
@@ -266,7 +336,7 @@ wrap <- function(data, metadata){
   })
 
   stool_consistency <- tryCatch({
-    data_cons <- list(Treat = read_data$Treatment, Y = read_data$stool_consistency)
+    data_cons <- list(Treat = read_data$Treat_stool_consistency, Y = read_data$stool_consistency)
     nof1_cons <- with(data_cons, {
       nof1.data(Y, Treat, response = "binomial")
     })
@@ -277,7 +347,7 @@ wrap <- function(data, metadata){
   })
 
   pain_interference <- tryCatch({
-    data_pain <- list(Treat = read_data$Treatment_weekly, Y = read_data$pain_interference)
+    data_pain <- list(Treat = read_data$Treat_pain_interference, Y = read_data$pain_interference)
     nof1_pain <- with(data_pain, {
       nof1.data(Y, Treat, response = "normal")
     })
@@ -288,7 +358,7 @@ wrap <- function(data, metadata){
   })
 
   gi_symptoms <- tryCatch({
-    data_gi <- list(Treat = read_data$Treatment_weekly, Y = read_data$gi_symptoms)
+    data_gi <- list(Treat = read_data$Treat_gi_symptoms, Y = read_data$gi_symptoms)
     nof1_gi <- with(data_gi, {
       nof1.data(Y, Treat, response = "normal")
     })
@@ -303,10 +373,10 @@ wrap <- function(data, metadata){
                    successful_run_stool_consistency = check_success(stool_consistency),
                    successful_run_pain_interference = check_success(pain_interference),
                    successful_run_gi_symptoms = check_success(gi_symptoms),
-                   enough_stool_consistency = check_enough_data(read_data$Treatment, read_data$stool_consistency),
-                   enough_stool_frequency = check_enough_data(read_data$Treatment, read_data$stool_frequency),
-                   enough_pain_interference = check_enough_data(read_data$Treatment_weekly, read_data$pain_interference),
-                   enough_gi_symptoms = check_enough_data(read_data$Treatment_weekly, read_data$gi_symptoms),
+                   enough_stool_consistency = check_enough_data(read_data$Treat_stool_consistency, read_data$stool_consistency),
+                   enough_stool_frequency = check_enough_data(read_data$Treat_stool_frequency, read_data$stool_frequency),
+                   enough_pain_interference = check_enough_data(read_data$Treat_pain_interference, read_data$pain_interference),
+                   enough_gi_symptoms = check_enough_data(read_data$Treat_gi_symptoms, read_data$gi_symptoms),
                    user_id = metadata$user_id,
                    timestamp_trialist_completed = Sys.time(),
                    trialist_version_id = 2,
