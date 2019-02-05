@@ -6,7 +6,7 @@ This repo was created primarily to serve as an analysis tool for the PCORI proje
 
 ```{r}
 library(devtools)
-install_github("MikeJSeo/nof1", force = TRUE)
+install_github("jiabei-yang/nof1", force = TRUE)
 library(nof1)
 ```
 
@@ -32,4 +32,4 @@ output2
 ```
 
 Thank you,    
-Michael Seo
+Michael Seo, Jiabei Yang
