@@ -292,7 +292,10 @@ summarize_nof1 <- function(nof1, result){
   with(c(nof1, result),{
 
     samples <- do.call(rbind, samples)
+    # samples <- do.call(rbind, result_freq$samples)
     raw_mean <- find_raw_mean(Y, Treat, response)
+    # raw_mean <- find_raw_mean(nof1_freq$Y, nof1_freq$Treat, result_freq$nof1$response)
+    
     rounded_raw_mean <- round_number(raw_mean, response)
 
     coef <- samples[,colnames(samples) %in% c("alpha", "beta_A", "beta_B")]
