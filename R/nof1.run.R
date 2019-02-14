@@ -182,3 +182,4 @@ find.max.gelman <- function(samples, index = NULL){
 
   max(gelman.diag(samples, multivariate = FALSE)$psrf[,1]) #look at point estimate instead of 95% C.I.
 }
+

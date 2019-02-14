@@ -32,6 +32,7 @@ read_input_data <- function(data, metadata){
   change_point_gi_symptoms <- cumsum(length_each)
 
   stool_consistency <- unlist(Outcome$daily_stool_consistency)
+  # when stool consistency is regular, then 0; irregular 1
   stool_consistency <- ifelse(1 < stool_consistency & stool_consistency < 7, 0, 1)
 
   stool_frequency <- unlist(Outcome$daily_stool_frequency)
@@ -120,6 +121,39 @@ washout <- function(read_data){
     }
     delete_obs_weekly
     gi_symptoms[delete_obs_weekly] <- NA
+    
+    for (i in unique(Treat_stool_consistency)){
+      if (sum(Treat_stool_consistency == i) == 
+          sum(is.na(stool_consistency[Treat_stool_consistency == i]))){
+        stool_consistency       <- stool_consistency[Treat_stool_consistency != i]
+        Treat_stool_consistency <- Treat_stool_consistency[Treat_stool_consistency != i]
+      }
+    }
+    
+    for (i in unique(Treat_stool_frequency)){
+      if (sum(Treat_stool_frequency == i) == 
+          sum(is.na(stool_frequency[Treat_stool_frequency == i]))){
+        stool_frequency       <- stool_frequency[Treat_stool_frequency != i]
+        Treat_stool_frequency <- Treat_stool_frequency[Treat_stool_frequency != i]
+      }
+    }
+    
+    for (i in unique(Treat_pain_interference)){
+      if (sum(Treat_pain_interference == i) == 
+          sum(is.na(pain_interference[Treat_pain_interference == i]))){
+        pain_interference       <- pain_interference[Treat_pain_interference != i]
+        Treat_pain_interference <- Treat_pain_interference[Treat_pain_interference != i]
+      }
+    }
+    
+    for (i in unique(Treat_gi_symptoms)){
+      if (sum(Treat_gi_symptoms == i) == 
+          sum(is.na(gi_symptoms[Treat_gi_symptoms == i]))){
+        gi_symptoms       <- gi_symptoms[Treat_gi_symptoms != i]
+        Treat_gi_symptoms <- Treat_gi_symptoms[Treat_gi_symptoms != i]
+      }
+    }
+    
     
     list(stool_consistency       = stool_consistency, 
          Treat_stool_consistency = Treat_stool_consistency,
@@ -292,14 +326,15 @@ summarize_nof1 <- function(nof1, result){
   with(c(nof1, result),{
 
     samples <- do.call(rbind, samples)
-    # samples <- do.call(rbind, result_freq$samples)
+    # samples <- do.call(rbind, result$samples)
     raw_mean <- find_raw_mean(Y, Treat, response)
-    # raw_mean <- find_raw_mean(nof1_freq$Y, nof1_freq$Treat, result_freq$nof1$response)
+    # raw_mean <- find_raw_mean(nof1$Y, nof1$Treat, result$nof1$response)
     
     rounded_raw_mean <- round_number(raw_mean, response)
 
     coef <- samples[,colnames(samples) %in% c("alpha", "beta_A", "beta_B")]
     diff <- find_mean_difference(coef, response, raw_mean)
+    # diff <- find_mean_difference(coef, nof1$response, raw_mean)
 
     raw_mean <- list(base = rounded_raw_mean[1], scd = rounded_raw_mean[2], mscd = rounded_raw_mean[3])
     mean_difference <- list(base_vs_scd = diff[1], base_vs_mscd = diff[2], mscd_vs_scd = diff[3])
