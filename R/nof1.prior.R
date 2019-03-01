@@ -28,7 +28,8 @@ nof1.prior.default <- function(prior.param){
       hy.prior <- list("dunif", 0, 5)
     } else if (response == "normal"){
       hy.prior <- list("dgamma", 0.001, 0.001)
-    #  hy.prior <- list("dunif", 0, 20)
+      # sd <- (max(Y, na.rm = T) - min(Y, na.rm = T)) / 2
+      # hy.prior <- list("dunif", 0, 50)
     } else{
       hy.prior <- list("dgamma", 1, 0.001)
     }

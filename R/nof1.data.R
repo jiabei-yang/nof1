@@ -78,7 +78,12 @@ nof1.data <- function(Y, Treat, baseline = "baseline", ncat = NULL, response = N
   }
 
   prior.param <- list(response = response, dc.prior = dc.prior, c1.prior = c1.prior, alpha.prior = alpha.prior, beta.prior = beta.prior, gamma.prior = gamma.prior, hy.prior = hy.prior, rho.prior = rho.prior)
+  # if (response == "normal"){
+  #   prior.data <- nof1.prior.default(prior.param, Y)
+  # } else {
   prior.data <- nof1.prior.default(prior.param)
+  # }
+  
 
   nof1 <- c(nof1, prior.data)
 

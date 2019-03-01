@@ -253,13 +253,13 @@ find_mean_difference <- function(coef, response, raw_mean){
   return(rounded)
 }
 
-calculate_p_threshold <- function(coef, response){
+calculate_p_threshold <- function(coef, response, Y, Treat){
 
   upper <-
     if(response == "poisson"){
       1.1
-    } else if(response == "binomial"){
-      1.1
+    # } else if(response == "binomial"){
+    #   1.1
     } else if(response == "normal"){
       2.9
     }
@@ -267,11 +267,37 @@ calculate_p_threshold <- function(coef, response){
   lower <-
     if(response == "poisson"){
       0.9
-    } else if(response == "binomial"){
-      0.9
+    # } else if(response == "binomial"){
+    #   0.9
     } else if(response == "normal"){
       -2.9
     }
+  
+  if (response == "binomial"){
+    p.avg <- (sum(Y[(Treat == "baseline") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "baseline"])) +
+                sum(Y[(Treat == "A") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "A"]))) / 2
+    se.lnrr.base.scd <- sqrt((1-p.avg) / p.avg / sum(!is.na(Y[Treat == "baseline"])) + 
+                               (1-p.avg) / p.avg / sum(!is.na(Y[Treat == "A"])))
+    
+    p.avg <- (sum(Y[(Treat == "baseline") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "baseline"])) +
+                sum(Y[(Treat == "B") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "B"]))) / 2
+    se.lnrr.base.mscd <- sqrt((1-p.avg) / p.avg / sum(!is.na(Y[Treat == "baseline"])) + 
+                               (1-p.avg) / p.avg / sum(!is.na(Y[Treat == "B"])))
+    
+    p.avg <- (sum(Y[(Treat == "A") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "A"])) +
+                sum(Y[(Treat == "B") & (!is.na(Y))] == 1) / sum(!is.na(Y[Treat == "B"]))) / 2
+    se.lnrr.scd.mscd <- sqrt((1-p.avg) / p.avg / sum(!is.na(Y[Treat == "A"])) + 
+                               (1-p.avg) / p.avg / sum(!is.na(Y[Treat == "B"])))
+    
+    upper.scd.base <- exp(se.lnrr.base.scd)
+    lower.scd.base <- exp(-se.lnrr.base.scd)
+    
+    upper.mscd.base <- exp(se.lnrr.base.mscd)
+    lower.mscd.base <- exp(-se.lnrr.base.mscd)
+    
+    upper.scd.mscd <- exp(se.lnrr.scd.mscd)
+    lower.scd.mscd <- exp(-se.lnrr.scd.mscd)
+  }
   
   trans <- transform_using_link(coef, response)
   
@@ -281,9 +307,12 @@ calculate_p_threshold <- function(coef, response){
     if(response == "normal"){
       base_vs_scd <- list(greater_than_threshold = round(mean(scd - base > upper, na.rm = TRUE)*100),
                           lower_than_threshold = round(mean(scd - base < lower, na.rm = TRUE)*100))
-    } else if(response %in% c("poisson", "binomial")){
+    } else if(response == "poisson"){
       base_vs_scd <- list(greater_than_threshold = round(mean(scd/base > upper, na.rm = TRUE)*100),
                           lower_than_threshold = round(mean(scd/base < lower, na.rm = TRUE)*100))
+    } else { # "binomial"
+      base_vs_scd <- list(greater_than_threshold = round(mean(scd/base > upper.scd.base, na.rm = TRUE)*100),
+                          lower_than_threshold = round(mean(scd/base < lower.scd.base, na.rm = TRUE)*100))
     }
     base_vs_scd <- rapply(base_vs_scd, change, how = "replace")
   } else{
@@ -294,9 +323,12 @@ calculate_p_threshold <- function(coef, response){
     if(response == "normal"){
       base_vs_mscd <- list(greater_than_threshold = round(mean(mscd - base > upper, na.rm = TRUE)*100),
                            lower_than_threshold = round(mean(mscd - base < lower, na.rm = TRUE)*100))
-    } else if(response %in% c("poisson", "binomial")){
+    } else if(response == "poisson"){
       base_vs_mscd <- list(greater_than_threshold = round(mean(mscd/base > upper, na.rm = TRUE)*100),
                           lower_than_threshold = round(mean(mscd/base < lower, na.rm = TRUE)*100))
+    } else{ # "binomial"
+      base_vs_mscd <- list(greater_than_threshold = round(mean(mscd/base > upper.mscd.base, na.rm = TRUE)*100),
+                           lower_than_threshold = round(mean(mscd/base < lower.mscd.base, na.rm = TRUE)*100))
     }
     base_vs_mscd <- rapply(base_vs_mscd, change, how = "replace")
   } else{
@@ -308,9 +340,12 @@ calculate_p_threshold <- function(coef, response){
     if(response == "normal"){
       mscd_vs_scd <- list(greater_than_threshold = round(mean(scd - mscd > upper, na.rm = TRUE)*100),
                            lower_than_threshold = round(mean(scd - mscd < lower, na.rm = TRUE)*100))
-    } else if(response %in% c("poisson", "binomial")){
+    } else if(response == "poisson"){
       mscd_vs_scd <- list(greater_than_threshold = round(mean(scd/mscd > upper, na.rm = TRUE)*100),
                           lower_than_threshold = round(mean(scd/mscd < lower, na.rm = TRUE)*100))
+    } else { # "binomial"
+      mscd_vs_scd <- list(greater_than_threshold = round(mean(scd/mscd > upper.scd.mscd, na.rm = TRUE)*100),
+                          lower_than_threshold = round(mean(scd/mscd < lower.scd.mscd, na.rm = TRUE)*100))
     }
     mscd_vs_scd <- rapply(mscd_vs_scd, change, how = "replace")
   } else{
@@ -323,6 +358,9 @@ calculate_p_threshold <- function(coef, response){
 
 summarize_nof1 <- function(nof1, result){
 
+  # nof1 <- nof1_cons
+  # result <- result_cons
+  
   with(c(nof1, result),{
 
     samples <- do.call(rbind, samples)
@@ -340,7 +378,7 @@ summarize_nof1 <- function(nof1, result){
     mean_difference <- list(base_vs_scd = diff[1], base_vs_mscd = diff[2], mscd_vs_scd = diff[3])
     three_group_comparison <- list(raw_mean = raw_mean, mean_difference = mean_difference)
 
-    gauge_graph <- calculate_p_threshold(coef, response)
+    gauge_graph <- calculate_p_threshold(coef, response, Y, Treat)
     return(list(three_group_comparison = three_group_comparison, gauge_graph = gauge_graph))
   })
 }
