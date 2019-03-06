@@ -4,6 +4,7 @@
 #' @param timestamp time of the nof1 event occurring
 #' @param timestamp.format format of the timestamp
 #' @param Outcomes.name used to label y-axis outcome variable
+#' @param normal.response.range the range of the outcome if continuous; a vector of minimum and maximum
 #' @examples
 #' Y <- laughter$Y
 #' Treat <- laughter$Treat
@@ -12,19 +13,83 @@
 #' time_series_plot(nof1, timestamp = timestamp, timestamp.format = "%m-%d-%Y", Outcome.name = "Stress")
 #' @export
 
-time_series_plot <- function(nof1, time = NULL, timestamp = NULL, timestamp.format = "%m/%d/%Y %H:%M", Outcome.name = ""){
+time_series_plot <- function(nof1, timestamp = NULL, timestamp.format = "%m/%d/%Y %H:%M", 
+                             x.name = "", y.name = "", title = NULL, 
+                             normal.response.range = NULL){
   
 
   date <- as.Date(timestamp, timestamp.format)
   
-  data <- data.frame(Y = as.numeric(nof1$Y), Treatment = gsub("\\_", " ", nof1$Treat), date = date)
-  data2 <- aggregate(nof1$Y, list(Treatment = gsub("\\_", " ", nof1$Treat)), mean)
+  data <- data.frame(Y = as.numeric(nof1$Y), 
+                     Treatment = gsub("\\_", " ", nof1$Treat), 
+                     date = date)
+  data2 <- aggregate(nof1$Y, 
+                     list(Treatment = gsub("\\_", " ", nof1$Treat)), 
+                     mean, na.rm = T)
     
-  ggplot(data, aes(x=date, Y, fill = Treatment)) + geom_bar(stat = "identity")  + facet_grid(. ~ Treatment) + theme_bw() + 
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
-    labs(x = "Date", y = Outcome.name) + geom_hline(data = data2, aes(yintercept = x, linetype = "Mean"), color="black") + 
-    scale_y_continuous(breaks = 0:nof1$ncat, oob = rescale_none, label = c("Low", rep("", length = nof1$ncat -1), "High")) +
-    scale_fill_manual(values=c("#adc2eb", "#ffb380")) + scale_linetype_manual(name = "", values = 1, guide = guide_legend(override.aes = list(color = c("black"))))
+  if (nof1$response == "normal"){
+    
+    fig <- ggplot(data, aes(x=date, Y, fill = Treatment)) + 
+      geom_bar(stat = "identity")  + 
+      facet_grid(. ~ Treatment) + 
+      theme_bw() + 
+      geom_hline(data  = data2, 
+                 aes(yintercept = x, linetype = "Mean"), 
+                 color ="black") +
+      scale_y_continuous(breaks = normal.response.range[1] + 
+                                          (normal.response.range[2] - normal.response.range[1]) / 4 * (0:4), 
+                         oob    = rescale_none, 
+                         label  = c("Low", 
+                                    round(normal.response.range[1] + 
+                                            (normal.response.range[2] - normal.response.range[1]) / 4 * (1:3), 
+                                          2), 
+                                    "High"),
+                         limits = normal.response.range) +
+      scale_linetype_manual(name   = "", 
+                            values = 1, 
+                            guide  = guide_legend(override.aes = list(color = c("black"))))
+      # scale_fill_manual(values = c("#adc2eb", "#ffb380")) + 
+      # theme(panel.grid.major = element_blank(), 
+      #       panel.grid.minor = element_blank(), 
+      #       axis.line        = element_line(colour = "black")) + 
+
+  } else { # other than normal
+    
+    fig <- ggplot(data, aes(x=date, Y, fill = Treatment)) + 
+      geom_bar(stat = "identity")  + 
+      facet_grid(. ~ Treatment) + 
+      theme_bw() + 
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(), 
+            axis.line        = element_line(colour = "black")) + 
+      geom_hline(data  = data2, 
+                 aes(yintercept = x, linetype = "Mean"), 
+                 color ="black") + 
+      scale_y_continuous(breaks = 0:nof1$ncat, 
+                         oob    = rescale_none, 
+                         label  = c("Low", rep("", length = nof1$ncat -1), "High")) +
+      scale_fill_manual(values = c("#adc2eb", "#ffb380")) + 
+      scale_linetype_manual(name   = "", 
+                            values = 1, 
+                            guide  = guide_legend(override.aes = list(color = c("black"))))
+    
+  }
+  
+  if (x.name == ""){
+    fig <- fig + 
+      ylab(y.name) + 
+      theme(axis.title.x = element_blank())
+  } else {
+    fig <- fig + 
+      xlab(x.name) +
+      ylab(y.name) 
+  }
+  
+  if (!is.null(title)){
+    fig + 
+      ggtitle(title)
+  }
+  
  
 }
 
