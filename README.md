@@ -31,7 +31,7 @@ output2 <- toJSON(result2, pretty = TRUE, UTC = TRUE, auto_unbox = TRUE, na = NU
 output2
 ```
 
-# MINES code
+# MINEs code
 
 ```{r}
 library(ggplot2)
