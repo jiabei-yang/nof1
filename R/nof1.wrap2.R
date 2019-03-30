@@ -30,19 +30,26 @@ summarize_nof1_afib <- function(nof1, result){
   with(c(nof1, result),{
 
     samples <- do.call(rbind, samples)
+    # samples <- do.call(rbind, result$samples)
     raw_mean <- find_raw_mean2(Y, Treat, baseline, response)
     rounded_raw_mean <- round_number(raw_mean, response)
     raw_mean <- list(control = rounded_raw_mean[1], trigger = rounded_raw_mean[2])
 
-    #An odds ratio of 1 indicates that the condition or event under study is equally likely to occur in both groups. An odds ratio greater than 1 indicates that the condition or event is more likely to occur in the first group. And an odds ratio less than 1 indicates that the condition or event is less likely to occur in the first group.
+    # An odds ratio of 1 indicates that the condition or event under study is equally likely to occur in both groups. 
+    # An odds ratio greater than 1 indicates that the condition or event is more likely to occur in the first group. 
+    # And an odds ratio less than 1 indicates that the condition or event is less likely to occur in the first group.
 
     coef_alpha <- samples[,"alpha", drop = F]
     coef_beta_A <- samples[,"beta_A", drop = F]
     
+    # hist(coef_alpha)
+    # hist(coef_beta_A)
+    
     base <- inv_logit(coef_alpha)
     trigger <- inv_logit(coef_alpha + coef_beta_A)
     
-    greater_than_1 <- round(mean(trigger/base > 1, na.rm = TRUE)*100)
+    greater_than_1 <- round(mean(coef_beta_A>0) *100)
+    # greater_than_1 <- round(mean((trigger/base) > 1, na.rm = TRUE)*100)
     greater_than_1 <- change(greater_than_1)
     
     return(list(raw_mean = raw_mean, prob_afib_more_likely_with_trigger = greater_than_1))
@@ -69,7 +76,9 @@ wrap2 <- function(data, metadata){
     nof1_afib <- with(data_afib, {
       nof1.data(Y, Treat, response = "binomial")
     })
+    # nof1 <- nof1_afib
     result_afib <- nof1.run(nof1_afib)
+    # result <- result_afib
     summarize_nof1_afib(nof1_afib, result_afib)
   }, error = function(error){
     return(paste("afib run error: ", error))
