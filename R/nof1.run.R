@@ -29,7 +29,6 @@
 #' summary(result$samples)
 #' @export
 
-
 nof1.run <- function(nof1, inits = NULL, n.chains = 3, max.run = 100000, setsize = 10000, n.run = 50000,
                      conv.limit = 1.05, extra.pars.save = NULL){
 
@@ -44,12 +43,13 @@ nof1.run <- function(nof1, inits = NULL, n.chains = 3, max.run = 100000, setsize
   with(nof1, {
 
   # response <- nof1$response
-  pars.save <- ifelse(response == "ordinal", "c", "alpha")
-
-  if(response == "normal"){
-    pars.save <- c(pars.save, "sd")
-  }
-
+  
+    if (response == "ordinal"){
+      pars.save <- "c"
+    } else {
+      pars.save <- NULL
+    }
+    
   # if(!is.null(knots)){
   #   for(i in 1:ncol(BS)){
   #     pars.save <- c(pars.save, paste0("gamma", i))
@@ -57,23 +57,27 @@ nof1.run <- function(nof1, inits = NULL, n.chains = 3, max.run = 100000, setsize
   # }
 
   # Treat.name <- nof1$Treat.name
-  for(i in Treat.name){
-    pars.save <- c(pars.save, paste0("beta_", i))
-  }
+    for(i in Treat.name){
+      pars.save <- c(pars.save, paste0("beta_", i))
+    }
 
-  # Y <- nof1$Y
-  data <- list(Y = Y)
-  for(i in Treat.name){
-    data[[paste0("Treat_", i)]] <- nof1[[paste0("Treat_", i)]]
-  }
+    if(response == "normal"){
+      pars.save <- c(pars.save, "sd")
+    }
+  
+    # Y <- nof1$Y
+    data <- list(Y = Y)
+    for(i in Treat.name){
+      data[[paste0("Treat_", i)]] <- nof1[[paste0("Treat_", i)]]
+    }
 
-  # if(!is.null(knots)){
-  #   data$BS <- nof1$BS
-  # }
+    # if(!is.null(knots)){
+    #   data$BS <- nof1$BS
+    # }
 
-  if(is.null(inits)){
-    inits <- nof1.inits(nof1, n.chains)
-  }
+    if(is.null(inits)){
+      inits <- nof1.inits(nof1, n.chains)
+    }
   samples <- jags.fit(nof1, data, pars.save, inits, n.chains, max.run, setsize, n.run, conv.limit)
 
   result <- list(nof1 = nof1, inits = inits, pars.save = pars.save, data.rjags = data)
@@ -122,11 +126,11 @@ jags.fit <- function(nof1, data, pars.save, inits, n.chains, max.run, setsize, n
   end <- mcpar(samples[[1]])[2]
   mid <- (end + start-1)/2
   burnin <- ceiling(end - mid)
-  samples <- window(samples, mid+1, end, 1) #keep the last half of the converged sequence
+  samples <- window(samples, start = mid+1, end = end, frequency = 1) #keep the last half of the converged sequence
   samples <- new.mcmc(samples)
 
   n.thin <- 1
-  if(check == TRUE){
+  if(check){
     stop("code didn't converge according to gelman-rubin diagnostics")
   } else if(n.run < burnin){
     n.thin <- ceiling(burnin/n.run)

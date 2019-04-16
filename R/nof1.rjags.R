@@ -21,10 +21,12 @@ nof1.normal.rjags <- function(nof1){
   code <- paste0(code,
                  "\n\tfor (i in 1:", nobs, ") {",
                  "\n\t\tm[i] <- mu[i]",
-                 "\n\t\tmu[i] <- alpha")
+                 "\n\t\tmu[i] <- beta_", Treat.name[1], "*Treat_", Treat.name[1], "[i]")
 
-  for(i in Treat.name){
-    code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+  if (length(Treat.name) > 1){
+    for(i in Treat.name[2:length(Treat.name)]){
+      code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+    }
   }
 
   # if(!is.null(knots)){
@@ -35,8 +37,8 @@ nof1.normal.rjags <- function(nof1){
 
   code <- paste0(code,
                  "\n\t\tY[i] ~ dnorm(m[i], prec)",
-                 "\n\t}",
-                 "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
+                 "\n\t}")
+                 # "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
 
   for(i in Treat.name){
     code <- paste0(code, "\n\tbeta_", i, " ~ ", beta.prior[[1]], "(", beta.prior[[2]], ",", beta.prior[[3]], ")")
@@ -55,7 +57,6 @@ nof1.normal.rjags <- function(nof1){
 
 
 
-
 nof1.binomial.rjags <- function(nof1){
 
   with(nof1, {
@@ -63,10 +64,12 @@ nof1.binomial.rjags <- function(nof1){
   code <- paste0("model{")
   code <- paste0(code,
                  "\n\tfor (i in 1:", nobs, ") {",
-                 "\n\t\tlogit(p[i]) <- alpha")
+                 "\n\t\tlogit(p[i]) <- beta_", Treat.name[1], "*Treat_", Treat.name[1], "[i]")
 
-  for(i in Treat.name){
-    code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+  if (length(Treat.name) > 1){
+    for(i in Treat.name[2:length(Treat.name)]){
+      code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+    }
   }
 
   # if(!is.null(knots)){
@@ -77,8 +80,8 @@ nof1.binomial.rjags <- function(nof1){
 
   code <- paste0(code,
                  "\n\t\tY[i] ~ dbern(p[i])",
-                 "\n\t}",
-                 "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
+                 "\n\t}")
+                 # "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
 
   for(i in Treat.name){
     code <- paste0(code, "\n\tbeta_", i, " ~ ", beta.prior[[1]], "(", beta.prior[[2]], ",", beta.prior[[3]], ")")
@@ -97,6 +100,7 @@ nof1.binomial.rjags <- function(nof1){
 }
 
 
+
 nof1.poisson.rjags <- function(nof1){
 
   with(nof1, {
@@ -104,10 +108,12 @@ nof1.poisson.rjags <- function(nof1){
   code <- paste0("model{")
   code <- paste0(code,
                  "\n\tfor (i in 1:", nobs, ") {",
-                 "\n\t\tlog(lambda[i]) <- alpha")
+                 "\n\t\tlog(lambda[i]) <- beta_", Treat.name[1], "*Treat_", Treat.name[1], "[i]")
 
-  for(i in Treat.name){
-    code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+  if (length(Treat.name) > 1){
+    for(i in Treat.name[2:length(Treat.name)]){
+      code <- paste0(code, " + beta_", i, "*Treat_", i, "[i]")
+    }
   }
 
   # if(!is.null(knots)){
@@ -118,8 +124,8 @@ nof1.poisson.rjags <- function(nof1){
 
   code <- paste0(code,
                  "\n\t\tY[i] ~ dpois(lambda[i])",
-                 "\n\t}",
-                 "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
+                 "\n\t}")
+  #               "\n\talpha ~ ", alpha.prior[[1]], "(", alpha.prior[[2]], ",", alpha.prior[[3]], ")")
 
   for(i in Treat.name){
     code <- paste0(code, "\n\tbeta_", i, " ~ ", beta.prior[[1]], "(", beta.prior[[2]], ",", beta.prior[[3]], ")")

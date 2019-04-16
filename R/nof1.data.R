@@ -45,18 +45,19 @@ nof1.data <- function(Y, Treat, baseline = "baseline", ncat = NULL, response = N
   }
   nobs <- length(Y)
 
-  if(!baseline %in% Treat){
-    stop("baseline treatment name is not in Treat")
-  }
+  # if(!baseline %in% Treat){
+  #   stop("baseline treatment name is not in Treat")
+  # }
 
   Treat <- gsub(" ", "\\_", Treat)
-  baseline <- gsub(" ", "\\_", baseline)
+  # baseline <- gsub(" ", "\\_", baseline)
 
   Treat.name <- unique(Treat)
-  Treat.name <- Treat.name[Treat.name != baseline]
+  # Treat.name <- Treat.name[Treat.name != baseline]
 
-  nof1 = list(Y = Y, Treat = Treat, baseline = baseline, ncat = ncat, nobs = nobs, Treat.name = Treat.name, response = response)
-
+  nof1 = list(Y = Y, Treat = Treat, ncat = ncat, nobs = nobs, Treat.name = Treat.name, response = response)
+  # nof1 = list(Y = Y, Treat = Treat, baseline = baseline, ncat = ncat, nobs = nobs, Treat.name = Treat.name, response = response)
+  
   # for correlated model, not used
   if(!is.null(Time)){
     cen.Time <- (Time - mean(Time, na.rm = TRUE)) / sd(Time, na.rm = TRUE)
@@ -84,7 +85,6 @@ nof1.data <- function(Y, Treat, baseline = "baseline", ncat = NULL, response = N
   prior.data <- nof1.prior.default(prior.param)
   # }
   
-
   nof1 <- c(nof1, prior.data)
 
   code <- nof1.rjags(nof1)

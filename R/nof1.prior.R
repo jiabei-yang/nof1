@@ -1,4 +1,3 @@
-
 nof1.prior.default <- function(prior.param){
 
   with(prior.param, {

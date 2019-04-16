@@ -30,14 +30,13 @@ nof1.inits.normal <- function(nof1, n.chains){
 
   with(nof1, {
 
-  Treat.matrix <- NULL
-  for(i in Treat.name){
-    Treat.matrix <- cbind(Treat.matrix, nof1[[paste0("Treat_", i)]])
-  }
-
-
-  model <- lm(Y ~ Treat.matrix)
-  co <- coef(summary(model))
+    Treat.matrix <- NULL
+    for(i in Treat.name){
+      Treat.matrix <- cbind(Treat.matrix, nof1[[paste0("Treat_", i)]])
+    }
+    
+    model <- lm(Y ~ Treat.matrix - 1)
+    co <- coef(summary(model))
 
   # else{
   #   model <- lm(Y ~ Treat.matrix + BS)
@@ -50,10 +49,11 @@ nof1.inits.normal <- function(nof1, n.chains){
     initial.values[[i]] = list()
   }
   for(i in 1:n.chains){
-    initial.values[[i]][["alpha"]] <- co[1,1] + rnorm(1) *co[1,2]
+    
+    # initial.values[[i]][["alpha"]] <- co[1,1] + rnorm(1) *co[1,2]
 
     for(j in 1:length(Treat.name)){
-      initial.values[[i]][[paste0("beta_", Treat.name[j])]] <- co[1+j,1] + rnorm(1) * co[1+j,2]
+      initial.values[[i]][[paste0("beta_", Treat.name[j])]] <- co[j,1] + rnorm(1) * co[j,2]
     }
 
     # if(!is.null(knots)){
@@ -101,7 +101,7 @@ nof1.inits.binom.poisson <- function(nof1, n.chains){
 
   if(response == "binomial"){
 
-    model <- glm(Y ~ Treat.matrix, family = binomial(link = "logit"))
+    model <- glm(Y ~ Treat.matrix - 1, family = binomial(link = "logit"))
     co <- coef(summary(model))
     # else{
     #   model <- glm(Y ~ Treat.matrix + BS, family = binomial(link = "logit"))
@@ -109,7 +109,7 @@ nof1.inits.binom.poisson <- function(nof1, n.chains){
     # }
   } else if(response == "poisson"){
 
-    model <- glm(Y ~ Treat.matrix, family = "poisson")
+    model <- glm(Y ~ Treat.matrix - 1, family = "poisson")
     co <- coef(summary(model))
     # else{
     #   model <- glm(Y ~ Treat.matrix + BS, family = "poisson")
@@ -123,10 +123,11 @@ nof1.inits.binom.poisson <- function(nof1, n.chains){
   }
   for(i in 1:n.chains){
 
-    initial.values[[i]][["alpha"]] <- co[1,1] + rnorm(1) *co[1,2]
+    # initial.values[[i]][["alpha"]] <- co[1,1] + rnorm(1) *co[1,2]
 
     for(j in 1:length(Treat.name)){
-      initial.values[[i]][[paste0("beta_", Treat.name[j])]] <- co[1+j,1] + rnorm(1) * co[1+j,2]
+      # initial.values[[i]][[paste0("beta_", Treat.name[j])]] <- co[1+j,1] + rnorm(1) * co[1+j,2]
+      initial.values[[i]][[paste0("beta_", Treat.name[j])]] <- co[j, 1] + rnorm(1) * co[j, 2]
     }
 
     # if(!is.null(knots)){
